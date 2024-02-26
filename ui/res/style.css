@@ -1,0 +1,37 @@
+box {background: black;}
+
+dialog {background: black;}
+
+button box {background: transparent;}
+
+grid {background: black;}
+
+tooltip {background: black;}
+
+list row {background: black;}
+
+list {background: black;}
+
+list row:hover {background: #222}
+
+list row:selected {background: #5294e2}
+
+separator {background:#222;}
+
+combobox box button.combo { background: black; }
+
+entry { background: black; font-size: large; }
+
+progressbar progress { background: #5294e2; }
+
+scale trough highlight { background: #5294e2; }
+
+scale trough highlight:disabled { background: rgba(82, 148, 226, 0.55); }
+
+.large { font-size: large; }
+
+menu {background: #222;}
+
+.button-hover {background: #222;}
+
+.button-press {background: #5294e2;}
