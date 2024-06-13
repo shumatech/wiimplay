@@ -1,4 +1,4 @@
-VERSION?=$(shell git describe --tags --always)
+VERSION?=$(shell git describe --tags --always --dirty)
 BUILD:=$(shell date +%FT%T)
 FLAGS=-tags=gtk_3_10 -ldflags "-X main.Version=$(VERSION) -X main.Build=$(BUILD)"
 Q?=@

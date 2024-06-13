@@ -7,6 +7,8 @@ import (
 type Controls struct {
     AudioOutput int
     AudioOutputList []string
+    AudioInput int
+    AudioInputList []string
     Balance float64
     FadeEffects bool
     FixedVolume bool
@@ -14,6 +16,7 @@ type Controls struct {
 
 type ControlsListener interface {
     AudioOutputSelect(index int)
+    AudioInputSelect(index int)
     BalanceSelect(value float64)
     FadeEffectsSelect(on bool)
     FixedVolumeSelect(on bool)
@@ -59,12 +62,32 @@ func ShowControlsDialog(window gtk.IWindow, controls *Controls, listener Control
     })
     grid.Attach(combo, 1, 0, 1, 1)
 
-    label, err = gtk.LabelNew("Volume Balance:")
+    label, err = gtk.LabelNew("Audio Input:")
     if err != nil {
         return err
     }
     label.SetHAlign(gtk.ALIGN_START)
     grid.Attach(label, 0, 1, 1, 1)
+
+    combo, err = gtk.ComboBoxTextNew()
+    if err != nil {
+        return err
+    }
+    for _, entry := range controls.AudioInputList {
+        combo.AppendText(entry)
+    }
+    combo.SetActive(controls.AudioInput)
+    combo.Connect("changed", func(self *gtk.ComboBoxText) {
+        listener.AudioInputSelect(self.GetActive())
+    })
+    grid.Attach(combo, 1, 1, 1, 1)
+
+    label, err = gtk.LabelNew("Volume Balance:")
+    if err != nil {
+        return err
+    }
+    label.SetHAlign(gtk.ALIGN_START)
+    grid.Attach(label, 0, 2, 1, 1)
 
     adjust, err := gtk.AdjustmentNew(0.0, -1.0, 1.0, 0.05, 0.1, 0.0)
     if err != nil {
@@ -81,14 +104,14 @@ func ShowControlsDialog(window gtk.IWindow, controls *Controls, listener Control
     }
     scale.SetDrawValue(true)
     scale.SetHasOrigin(false)
-    grid.Attach(scale, 1, 1, 1, 1)
+    grid.Attach(scale, 1, 2, 1, 1)
 
     label, err = gtk.LabelNew("Fade Effects:")
     if err != nil {
         return err
     }
     label.SetHAlign(gtk.ALIGN_START)
-    grid.Attach(label, 0, 2, 1, 1)
+    grid.Attach(label, 0, 3, 1, 1)
 
     sw, err := gtk.SwitchNew()
     if err != nil {
@@ -98,14 +121,14 @@ func ShowControlsDialog(window gtk.IWindow, controls *Controls, listener Control
     sw.Connect("state-set", func(self *gtk.Switch) {
         listener.FadeEffectsSelect(self.GetActive())
     })
-    grid.Attach(sw, 1, 2, 1, 1)
+    grid.Attach(sw, 1, 3, 1, 1)
 
     label, err = gtk.LabelNew("Fixed Volume:")
     if err != nil {
         return err
     }
     label.SetHAlign(gtk.ALIGN_START)
-    grid.Attach(label, 0, 3, 1, 1)
+    grid.Attach(label, 0, 4, 1, 1)
 
     sw, err = gtk.SwitchNew()
     if err != nil {
@@ -115,7 +138,7 @@ func ShowControlsDialog(window gtk.IWindow, controls *Controls, listener Control
     sw.Connect("state-set", func(self *gtk.Switch) {
         listener.FixedVolumeSelect(self.GetActive())
     })
-    grid.Attach(sw, 1, 3, 1, 1)
+    grid.Attach(sw, 1, 4, 1, 1)
 
     box.Add(grid)
 

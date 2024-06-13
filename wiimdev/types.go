@@ -31,6 +31,9 @@ type Device interface {
     SetFadeEffects(on bool) error
     GetFixedVolume() (bool, error)
     SetFixedVolume(on bool) error
+    GetAudioInput() (int, error)
+    GetAudioInputList() ([]string, error)
+    SetAudioInput(input int) error
 }
 
 type DeviceDiscovery struct {

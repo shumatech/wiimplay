@@ -33,6 +33,9 @@ func (device *FakeDevice) GetFadeEffects() (bool, error) { return false, nil }
 func (device *FakeDevice) SetFadeEffects(on bool) error { return nil }
 func (device *FakeDevice) GetFixedVolume() (bool, error) { return false, nil }
 func (device *FakeDevice) SetFixedVolume(on bool) error { return nil }
+func (device *FakeDevice) GetAudioInput() (int, error) { return 0, nil }
+func (device *FakeDevice) GetAudioInputList() ([]string, error) { return nil, nil }
+func (device *FakeDevice) SetAudioInput(input int) error { return nil }
 
 func NewFakeDevice() *FakeDevice {
     return &FakeDevice{}

@@ -229,6 +229,12 @@ func (ctl *Controller) ControlsPress() {
         if controls.AudioOutputList, err = device.GetAudioOutputList(); err != nil {
             return
         }
+        if controls.AudioInput, err = device.GetAudioInput(); err != nil {
+            return
+        }
+        if controls.AudioInputList, err = device.GetAudioInputList(); err != nil {
+            return
+        }
         if controls.Balance, err = device.GetBalance(); err != nil {
             return
         }
@@ -256,6 +262,11 @@ func (ctl *Controller) ControlsPress() {
 func (ctl *Controller) AudioOutputSelect(index int) {
     device := ctl.device
     ctl.run(func() { device.SetAudioOutput(index) })
+}
+
+func (ctl *Controller) AudioInputSelect(index int) {
+    device := ctl.device
+    ctl.run(func() { device.SetAudioInput(index) })
 }
 
 func (ctl *Controller) BalanceSelect(value float64) {

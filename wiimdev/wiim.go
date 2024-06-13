@@ -395,6 +395,40 @@ func (device *WiimDevice) SetFixedVolume(on bool) error {
     return nil
 }
 
+func (device *WiimDevice) GetAudioInput() (int, error) {
+    result := &struct {
+        Mode string
+    }{}
+    err := device.command("getPlayerStatus", &result)
+    if err != nil {
+        return 0, err
+    }
+    return map[string]int{
+        "10": 1,
+        "41": 2,
+        "40": 3,
+        "43": 4,
+    }[result.Mode] - 1, nil
+}
+
+func (device *WiimDevice) GetAudioInputList() ([]string, error) {
+    return []string{"Network", "Bluetooth", "Line In", "Optical In"}, nil
+}
+
+func (device *WiimDevice) SetAudioInput(input int) error {
+    mode := []string{"wifi", "bluetooth", "line-in", "optical"}[input]
+
+    var result string
+    err := device.command(fmt.Sprintf("setPlayerCmd:switchmode:%s", mode), &result)
+    if err != nil {
+        return err
+    }
+    if result != "OK" {
+        return fmt.Errorf("switchmode failed")
+    }
+    return nil
+}
+
 func NewWiimDevice(urlString string) (*WiimDevice, error) {
     device := &WiimDevice{}
 
