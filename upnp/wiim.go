@@ -313,7 +313,9 @@ func (client *AVTransport1) GetInfoExCtx(
     if CurrentVolume, err = soap.UnmarshalUi4(response.CurrentVolume); err != nil {
         return
     }
-    if CurrentMute, err = soap.UnmarshalUi4(response.CurrentMute); err != nil {
+    if response.CurrentMute == "" {
+        CurrentMute = 0
+    } else if CurrentMute, err = soap.UnmarshalUi4(response.CurrentMute); err != nil {
         return
     }
     if CurrentChannel, err = soap.UnmarshalUi4(response.CurrentChannel); err != nil {
