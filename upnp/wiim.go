@@ -16,7 +16,7 @@ import (
     "time"
 
     "github.com/huin/goupnp"
-    "github.com/huin/goupnp/soap"
+    "github.com/shumatech/wiimplay/upnp/soap"
 )
 
 // Hack to avoid Go complaining if time isn't used.
@@ -313,9 +313,7 @@ func (client *AVTransport1) GetInfoExCtx(
     if CurrentVolume, err = soap.UnmarshalUi4(response.CurrentVolume); err != nil {
         return
     }
-    if response.CurrentMute == "" {
-        CurrentMute = 0
-    } else if CurrentMute, err = soap.UnmarshalUi4(response.CurrentMute); err != nil {
+    if CurrentMute, err = soap.UnmarshalUi4(response.CurrentMute); err != nil {
         return
     }
     if CurrentChannel, err = soap.UnmarshalUi4(response.CurrentChannel); err != nil {
