@@ -16,7 +16,7 @@ import (
     "time"
 
     "github.com/huin/goupnp"
-    "github.com/huin/goupnp/soap"
+    "github.com/shumatech/wiimplay/upnp/soap"
 )
 
 // Hack to avoid Go complaining if time isn't used.

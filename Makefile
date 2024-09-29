@@ -9,6 +9,7 @@ SRC=main.go \
     wiimdev/fake.go \
     upnp/schema.go \
     upnp/wiim.go \
+    upnp/soap/soap.go \
     dcache/dcache.go \
     mpris/server.go \
     ui/controller.go \
