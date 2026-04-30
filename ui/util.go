@@ -41,6 +41,20 @@ func setBoxSpacingMargin(box *gtk.Box, spacing int, margin int) {
 	box.SetMarginRight(margin)
 }
 
+func newDialogWithContent(title string, parent gtk.IWindow, flags gtk.DialogFlags, buttons ...[]interface{}) (*gtk.Dialog, *gtk.Box, error) {
+	dialog, err := gtk.DialogNewWithButtons(title, parent, flags, buttons...)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	box, err := dialog.GetContentArea()
+	if err != nil {
+		dialog.Destroy()
+		return nil, nil, err
+	}
+	return dialog, box, nil
+}
+
 func createMenu(items []menuItem) (*gtk.Menu, error) {
 	menu, err := gtk.MenuNew()
 	if err != nil {

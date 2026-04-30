@@ -7,23 +7,21 @@ import (
 )
 
 func ShowAboutDialog(parent *gtk.Window, about string) error {
-	dialog, err := gtk.DialogNewWithButtons("About", parent, gtk.DIALOG_DESTROY_WITH_PARENT,
+	dialog, box, err := newDialogWithContent("About", parent, gtk.DIALOG_DESTROY_WITH_PARENT,
 		[]interface{}{"Close", gtk.RESPONSE_CLOSE})
-	if err != nil {
-		return err
-	}
-	box, err := dialog.GetContentArea()
 	if err != nil {
 		return err
 	}
 	image, err := createImageFromData(res.WiimAbout)
 	if err != nil {
+		dialog.Destroy()
 		return err
 	}
 	box.Add(image)
 
 	label, err := gtk.LabelNew("")
 	if err != nil {
+		dialog.Destroy()
 		return err
 	}
 	label.SetMarkup(

@@ -26,12 +26,7 @@ func ShowSettingsDialog(window gtk.IWindow, settings *Settings) (bool, error) {
 	flags := gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
 	ok := []interface{}{"OK", gtk.RESPONSE_ACCEPT}
 	cancel := []interface{}{"Cancel", gtk.RESPONSE_REJECT}
-	dialog, err := gtk.DialogNewWithButtons("Settings", window, flags, cancel, ok)
-	if err != nil {
-		return false, err
-	}
-
-	box, err := dialog.GetContentArea()
+	dialog, box, err := newDialogWithContent("Settings", window, flags, cancel, ok)
 	if err != nil {
 		return false, err
 	}

@@ -63,18 +63,14 @@ func addSwitchControl(grid *gtk.Grid, label string, row int, active bool, change
 func ShowControlsDialog(window gtk.IWindow, controls *Controls, listener ControlsListener) error {
 	flags := gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
 	close := []interface{}{"Close", gtk.RESPONSE_CLOSE}
-	dialog, err := gtk.DialogNewWithButtons("Controls", window, flags, close)
-	if err != nil {
-		return err
-	}
-
-	box, err := dialog.GetContentArea()
+	dialog, box, err := newDialogWithContent("Controls", window, flags, close)
 	if err != nil {
 		return err
 	}
 
 	grid, err := gtk.GridNew()
 	if err != nil {
+		dialog.Destroy()
 		return err
 	}
 	grid.SetRowSpacing(10)
@@ -83,18 +79,21 @@ func ShowControlsDialog(window gtk.IWindow, controls *Controls, listener Control
 	err = addComboControl(grid, "Audio Output:", 0, controls.AudioOutputList, controls.AudioOutput,
 		listener.AudioOutputSelect)
 	if err != nil {
+		dialog.Destroy()
 		return err
 	}
 
 	err = addComboControl(grid, "Audio Input:", 1, controls.AudioInputList, controls.AudioInput,
 		listener.AudioInputSelect)
 	if err != nil {
+		dialog.Destroy()
 		return err
 	}
 
 	adjust, err := gtk.AdjustmentNew(0.0, -1.0, 1.0, 0.05, 0.1, 0.0)
 	if err != nil {
-		return nil
+		dialog.Destroy()
+		return err
 	}
 	adjust.SetValue(controls.Balance)
 	adjust.Connect("value-changed", func(self *gtk.Adjustment) {
@@ -103,25 +102,29 @@ func ShowControlsDialog(window gtk.IWindow, controls *Controls, listener Control
 
 	scale, err := ScaleExtNew(gtk.ORIENTATION_HORIZONTAL, adjust)
 	if err != nil {
-		return nil
+		dialog.Destroy()
+		return err
 	}
 	scale.SetDrawValue(true)
 	scale.SetHasOrigin(false)
 
 	err = addControlRow(grid, "Volume Balance:", 2, scale)
 	if err != nil {
+		dialog.Destroy()
 		return err
 	}
 
 	err = addSwitchControl(grid, "Fade Effects:", 3, controls.FadeEffects,
 		listener.FadeEffectsSelect)
 	if err != nil {
+		dialog.Destroy()
 		return err
 	}
 
 	err = addSwitchControl(grid, "Fixed Volume:", 4, controls.FixedVolume,
 		listener.FixedVolumeSelect)
 	if err != nil {
+		dialog.Destroy()
 		return err
 	}
 
