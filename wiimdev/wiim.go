@@ -25,6 +25,22 @@ type WiimDevice struct {
 	client    *http.Client
 }
 
+type audioInputOption struct {
+	name       string
+	statusMode string
+	switchMode string
+}
+
+var (
+	audioOutputs = []string{"Optical Out", "Line Out", "Coax Out"}
+	audioInputs  = []audioInputOption{
+		{name: "Network", statusMode: "10", switchMode: "wifi"},
+		{name: "Bluetooth", statusMode: "41", switchMode: "bluetooth"},
+		{name: "Line In", statusMode: "40", switchMode: "line-in"},
+		{name: "Optical In", statusMode: "43", switchMode: "optical"},
+	}
+)
+
 func parseDuration(str string) time.Duration {
 	var h, m, s int
 	_, err := fmt.Sscanf(str, "%d:%d:%d", &h, &m, &s)
@@ -59,6 +75,23 @@ func getMetadata(metadata string) *Metadata {
 	}
 }
 
+func optionNames(options []audioInputOption) []string {
+	names := make([]string, len(options))
+	for i, option := range options {
+		names[i] = option.name
+	}
+	return names
+}
+
+func audioInputIndex(statusMode string) int {
+	for i, option := range audioInputs {
+		if option.statusMode == statusMode {
+			return i
+		}
+	}
+	return -1
+}
+
 func newDeviceDiscovery(root *goupnp.RootDevice) *DeviceDiscovery {
 	return &DeviceDiscovery{
 		Url:         strings.TrimSpace(root.URLBaseStr),
@@ -81,15 +114,15 @@ func (device *WiimDevice) command(command string, result interface{}) error {
 		return err
 	}
 
-	switch result.(type) {
-	case string:
-		result = string(data)
-	case int:
-		result, err = strconv.Atoi(string(data))
-	case float64:
-		result, err = strconv.ParseFloat(string(data), 64)
+	switch value := result.(type) {
+	case *string:
+		*value = string(data)
+	case *int:
+		*value, err = strconv.Atoi(strings.TrimSpace(string(data)))
+	case *float64:
+		*value, err = strconv.ParseFloat(strings.TrimSpace(string(data)), 64)
 	default:
-		err = json.Unmarshal(data, &result)
+		err = json.Unmarshal(data, result)
 	}
 	return err
 }
@@ -328,7 +361,7 @@ func (device *WiimDevice) GetAudioOutput() (int, error) {
 }
 
 func (device *WiimDevice) GetAudioOutputList() ([]string, error) {
-	return []string{"Optical Out", "Line Out", "Coax Out"}, nil
+	return append([]string(nil), audioOutputs...), nil
 }
 
 func (device *WiimDevice) SetAudioOutput(output int) error {
@@ -384,20 +417,18 @@ func (device *WiimDevice) GetAudioInput() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return map[string]int{
-		"10": 1,
-		"41": 2,
-		"40": 3,
-		"43": 4,
-	}[result.Mode] - 1, nil
+	return audioInputIndex(result.Mode), nil
 }
 
 func (device *WiimDevice) GetAudioInputList() ([]string, error) {
-	return []string{"Network", "Bluetooth", "Line In", "Optical In"}, nil
+	return optionNames(audioInputs), nil
 }
 
 func (device *WiimDevice) SetAudioInput(input int) error {
-	mode := []string{"wifi", "bluetooth", "line-in", "optical"}[input]
+	if input < 0 || input >= len(audioInputs) {
+		return fmt.Errorf("audio input index %d out of range", input)
+	}
+	mode := audioInputs[input].switchMode
 
 	return device.commandOK(fmt.Sprintf("setPlayerCmd:switchmode:%s", mode), "switchmode")
 }
