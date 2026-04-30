@@ -22,6 +22,44 @@ type ControlsListener interface {
 	FixedVolumeSelect(on bool)
 }
 
+func addControlRow(grid *gtk.Grid, labelText string, row int, widget gtk.IWidget) error {
+	label, err := gtk.LabelNew(labelText)
+	if err != nil {
+		return err
+	}
+	label.SetHAlign(gtk.ALIGN_START)
+	grid.Attach(label, 0, row, 1, 1)
+	grid.Attach(widget, 1, row, 1, 1)
+	return nil
+}
+
+func addComboControl(grid *gtk.Grid, label string, row int, entries []string, active int, changed func(int)) error {
+	combo, err := gtk.ComboBoxTextNew()
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		combo.AppendText(entry)
+	}
+	combo.SetActive(active)
+	combo.Connect("changed", func(self *gtk.ComboBoxText) {
+		changed(self.GetActive())
+	})
+	return addControlRow(grid, label, row, combo)
+}
+
+func addSwitchControl(grid *gtk.Grid, label string, row int, active bool, changed func(bool)) error {
+	sw, err := gtk.SwitchNew()
+	if err != nil {
+		return err
+	}
+	sw.SetActive(active)
+	sw.Connect("state-set", func(self *gtk.Switch) {
+		changed(self.GetActive())
+	})
+	return addControlRow(grid, label, row, sw)
+}
+
 func ShowControlsDialog(window gtk.IWindow, controls *Controls, listener ControlsListener) error {
 	flags := gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
 	close := []interface{}{"Close", gtk.RESPONSE_CLOSE}
@@ -42,52 +80,17 @@ func ShowControlsDialog(window gtk.IWindow, controls *Controls, listener Control
 	grid.SetRowSpacing(10)
 	grid.SetColumnSpacing(10)
 
-	label, err := gtk.LabelNew("Audio Output:")
+	err = addComboControl(grid, "Audio Output:", 0, controls.AudioOutputList, controls.AudioOutput,
+		listener.AudioOutputSelect)
 	if err != nil {
 		return err
 	}
-	label.SetHAlign(gtk.ALIGN_START)
-	grid.Attach(label, 0, 0, 1, 1)
 
-	combo, err := gtk.ComboBoxTextNew()
+	err = addComboControl(grid, "Audio Input:", 1, controls.AudioInputList, controls.AudioInput,
+		listener.AudioInputSelect)
 	if err != nil {
 		return err
 	}
-	for _, entry := range controls.AudioOutputList {
-		combo.AppendText(entry)
-	}
-	combo.SetActive(controls.AudioOutput)
-	combo.Connect("changed", func(self *gtk.ComboBoxText) {
-		listener.AudioOutputSelect(self.GetActive())
-	})
-	grid.Attach(combo, 1, 0, 1, 1)
-
-	label, err = gtk.LabelNew("Audio Input:")
-	if err != nil {
-		return err
-	}
-	label.SetHAlign(gtk.ALIGN_START)
-	grid.Attach(label, 0, 1, 1, 1)
-
-	combo, err = gtk.ComboBoxTextNew()
-	if err != nil {
-		return err
-	}
-	for _, entry := range controls.AudioInputList {
-		combo.AppendText(entry)
-	}
-	combo.SetActive(controls.AudioInput)
-	combo.Connect("changed", func(self *gtk.ComboBoxText) {
-		listener.AudioInputSelect(self.GetActive())
-	})
-	grid.Attach(combo, 1, 1, 1, 1)
-
-	label, err = gtk.LabelNew("Volume Balance:")
-	if err != nil {
-		return err
-	}
-	label.SetHAlign(gtk.ALIGN_START)
-	grid.Attach(label, 0, 2, 1, 1)
 
 	adjust, err := gtk.AdjustmentNew(0.0, -1.0, 1.0, 0.05, 0.1, 0.0)
 	if err != nil {
@@ -104,41 +107,23 @@ func ShowControlsDialog(window gtk.IWindow, controls *Controls, listener Control
 	}
 	scale.SetDrawValue(true)
 	scale.SetHasOrigin(false)
-	grid.Attach(scale, 1, 2, 1, 1)
 
-	label, err = gtk.LabelNew("Fade Effects:")
+	err = addControlRow(grid, "Volume Balance:", 2, scale)
 	if err != nil {
 		return err
 	}
-	label.SetHAlign(gtk.ALIGN_START)
-	grid.Attach(label, 0, 3, 1, 1)
 
-	sw, err := gtk.SwitchNew()
+	err = addSwitchControl(grid, "Fade Effects:", 3, controls.FadeEffects,
+		listener.FadeEffectsSelect)
 	if err != nil {
 		return err
 	}
-	sw.SetActive(controls.FadeEffects)
-	sw.Connect("state-set", func(self *gtk.Switch) {
-		listener.FadeEffectsSelect(self.GetActive())
-	})
-	grid.Attach(sw, 1, 3, 1, 1)
 
-	label, err = gtk.LabelNew("Fixed Volume:")
+	err = addSwitchControl(grid, "Fixed Volume:", 4, controls.FixedVolume,
+		listener.FixedVolumeSelect)
 	if err != nil {
 		return err
 	}
-	label.SetHAlign(gtk.ALIGN_START)
-	grid.Attach(label, 0, 4, 1, 1)
-
-	sw, err = gtk.SwitchNew()
-	if err != nil {
-		return err
-	}
-	sw.SetActive(controls.FixedVolume)
-	sw.Connect("state-set", func(self *gtk.Switch) {
-		listener.FixedVolumeSelect(self.GetActive())
-	})
-	grid.Attach(sw, 1, 4, 1, 1)
 
 	box.Add(grid)
 

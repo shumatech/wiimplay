@@ -12,6 +12,16 @@ type Settings struct {
 	HideOnStart       bool
 }
 
+func addSettingsCheckButton(box *gtk.Box, label string, active bool) (*gtk.CheckButton, error) {
+	button, err := gtk.CheckButtonNewWithLabel(label)
+	if err != nil {
+		return nil, err
+	}
+	button.SetActive(active)
+	box.Add(button)
+	return button, nil
+}
+
 func ShowSettingsDialog(window gtk.IWindow, settings *Settings) (bool, error) {
 	flags := gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
 	ok := []interface{}{"OK", gtk.RESPONSE_ACCEPT}
@@ -26,40 +36,30 @@ func ShowSettingsDialog(window gtk.IWindow, settings *Settings) (bool, error) {
 		return false, err
 	}
 
-	sendNotifications, err := gtk.CheckButtonNewWithLabel("Send notifications")
+	sendNotifications, err := addSettingsCheckButton(box, "Send notifications", settings.SendNotifications)
 	if err != nil {
 		return false, err
 	}
-	sendNotifications.SetActive(settings.SendNotifications)
-	box.Add(sendNotifications)
 
-	mprisSupport, err := gtk.CheckButtonNewWithLabel("MPRIS support")
+	mprisSupport, err := addSettingsCheckButton(box, "MPRIS support", settings.MprisSupport)
 	if err != nil {
 		return false, err
 	}
-	mprisSupport.SetActive(settings.MprisSupport)
-	box.Add(mprisSupport)
 
-	showStatusIcon, err := gtk.CheckButtonNewWithLabel("Show status icon")
+	showStatusIcon, err := addSettingsCheckButton(box, "Show status icon", settings.ShowStatusIcon)
 	if err != nil {
 		return false, err
 	}
-	showStatusIcon.SetActive(settings.ShowStatusIcon)
-	box.Add(showStatusIcon)
 
-	hideOnClose, err := gtk.CheckButtonNewWithLabel("Hide on close")
+	hideOnClose, err := addSettingsCheckButton(box, "Hide on close", settings.HideOnClose)
 	if err != nil {
 		return false, err
 	}
-	hideOnClose.SetActive(settings.HideOnClose)
-	box.Add(hideOnClose)
 
-	hideOnStart, err := gtk.CheckButtonNewWithLabel("Hide on start")
+	hideOnStart, err := addSettingsCheckButton(box, "Hide on start", settings.HideOnStart)
 	if err != nil {
 		return false, err
 	}
-	hideOnStart.SetActive(settings.HideOnStart)
-	box.Add(hideOnStart)
 
 	setBoxSpacingMargin(box, 10, 10)
 	box.ShowAll()
